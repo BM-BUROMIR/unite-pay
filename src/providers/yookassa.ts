@@ -54,7 +54,10 @@ export class YooKassaProvider implements PaymentProvider {
   }
 
   async getPayment(providerPaymentId: string): Promise<Payment> {
-    const res = await this.request<YooKassaPaymentResponse>('GET', `/payments/${providerPaymentId}`);
+    const res = await this.request<YooKassaPaymentResponse>(
+      'GET',
+      `/payments/${providerPaymentId}`,
+    );
     return this.mapPayment(res);
   }
 

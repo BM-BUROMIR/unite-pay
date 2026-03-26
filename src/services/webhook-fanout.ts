@@ -52,14 +52,16 @@ export async function fanOutWebhook(projectSlug: string, event: FanOutEvent): Pr
     }
   }
 
-  await getSupabase().from('pay_webhook_log').insert({
-    project_slug: projectSlug,
-    event_type: event.event,
-    payload: event,
-    status_code: statusCode,
-    response_body: responseBody?.slice(0, 1000),
-    attempts,
-  });
+  await getSupabase()
+    .from('pay_webhook_log')
+    .insert({
+      project_slug: projectSlug,
+      event_type: event.event,
+      payload: event,
+      status_code: statusCode,
+      response_body: responseBody?.slice(0, 1000),
+      attempts,
+    });
 
   if (!statusCode || statusCode >= 400) {
     console.error(`fanOutWebhook failed: ${projectSlug} ${event.event} status=${statusCode}`);

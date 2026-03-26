@@ -16,10 +16,10 @@ cron.get('/check-expiring', async (c) => {
     let expired = 0;
 
     const projects = await getAllActiveProjects();
-    const maxDays = Math.max(...projects.map(p => p.notify_before_days), 7);
+    const maxDays = Math.max(...projects.map((p) => p.notify_before_days), 7);
     const expiring = await getExpiringPurchases(maxDays);
     for (const purchase of expiring) {
-      const project = projects.find(p => p.slug === purchase.project);
+      const project = projects.find((p) => p.slug === purchase.project);
       if (!project) {
         continue;
       }

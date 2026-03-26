@@ -23,10 +23,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 }
 
 export async function getAllActiveProjects(): Promise<Project[]> {
-  const { data } = await getSupabase()
-    .from('pay_projects')
-    .select('*')
-    .eq('active', true);
+  const { data } = await getSupabase().from('pay_projects').select('*').eq('active', true);
 
   return (data || []) as Project[];
 }

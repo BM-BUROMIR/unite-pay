@@ -18,38 +18,39 @@
 
 ### Files to Create
 
-| File | Responsibility |
-|------|---------------|
-| `src/index.ts` | Hono app, route registration, middleware |
-| `src/config.ts` | Env config loader |
-| `src/db.ts` | Supabase client singleton |
-| `src/providers/yookassa.ts` | YooKassa API client (from shared/packages/payments) |
-| `src/providers/webhook-parser.ts` | Parse YooKassa webhook body |
-| `src/providers/types.ts` | Payment interfaces |
-| `src/routes/create.ts` | POST /create — create payment |
-| `src/routes/webhook.ts` | POST /webhook/yookassa — handle + fan-out |
-| `src/routes/status.ts` | GET /status — check subscription |
-| `src/routes/health.ts` | GET /health |
-| `src/routes/cron.ts` | GET /cron/check-expiring |
-| `src/services/purchase-service.ts` | pay_purchases CRUD |
-| `src/services/project-service.ts` | pay_projects CRUD |
-| `src/services/webhook-fanout.ts` | Fan-out delivery + retry + logging |
-| `src/middleware/api-key.ts` | Project-based API key auth |
-| `src/middleware/cron-auth.ts` | CRON_SECRET auth |
-| `supabase/migrations/001_pay_purchases.sql` | Purchases table |
-| `supabase/migrations/002_pay_projects.sql` | Projects table |
-| `supabase/migrations/003_pay_webhook_log.sql` | Webhook log table |
-| `package.json` | Dependencies and scripts |
-| `tsconfig.json` | TypeScript config |
-| `Dockerfile` | Multi-stage Docker build |
-| `.env.example` | Environment template |
-| `CLAUDE.md` | Project instructions |
+| File                                          | Responsibility                                      |
+| --------------------------------------------- | --------------------------------------------------- |
+| `src/index.ts`                                | Hono app, route registration, middleware            |
+| `src/config.ts`                               | Env config loader                                   |
+| `src/db.ts`                                   | Supabase client singleton                           |
+| `src/providers/yookassa.ts`                   | YooKassa API client (from shared/packages/payments) |
+| `src/providers/webhook-parser.ts`             | Parse YooKassa webhook body                         |
+| `src/providers/types.ts`                      | Payment interfaces                                  |
+| `src/routes/create.ts`                        | POST /create — create payment                       |
+| `src/routes/webhook.ts`                       | POST /webhook/yookassa — handle + fan-out           |
+| `src/routes/status.ts`                        | GET /status — check subscription                    |
+| `src/routes/health.ts`                        | GET /health                                         |
+| `src/routes/cron.ts`                          | GET /cron/check-expiring                            |
+| `src/services/purchase-service.ts`            | pay_purchases CRUD                                  |
+| `src/services/project-service.ts`             | pay_projects CRUD                                   |
+| `src/services/webhook-fanout.ts`              | Fan-out delivery + retry + logging                  |
+| `src/middleware/api-key.ts`                   | Project-based API key auth                          |
+| `src/middleware/cron-auth.ts`                 | CRON_SECRET auth                                    |
+| `supabase/migrations/001_pay_purchases.sql`   | Purchases table                                     |
+| `supabase/migrations/002_pay_projects.sql`    | Projects table                                      |
+| `supabase/migrations/003_pay_webhook_log.sql` | Webhook log table                                   |
+| `package.json`                                | Dependencies and scripts                            |
+| `tsconfig.json`                               | TypeScript config                                   |
+| `Dockerfile`                                  | Multi-stage Docker build                            |
+| `.env.example`                                | Environment template                                |
+| `CLAUDE.md`                                   | Project instructions                                |
 
 ---
 
 ## Task 1: Project Scaffolding
 
 **Files:**
+
 - Create: `package.json`, `tsconfig.json`, `.env.example`, `CLAUDE.md`, `.gitignore`
 
 - [ ] **Step 1: Create package.json**
@@ -145,21 +146,25 @@ dist/
 Universal payment microservice for aipinion projects.
 
 ## Stack
+
 Hono 4 + Supabase + TypeScript + YooKassa
 
 ## Commands
+
 - `npm run dev` — dev server with hot reload
 - `npm run build` — compile TypeScript
 - `npm run lint` — ESLint
 - `npm test` — Vitest
 
 ## Architecture
+
 - `src/providers/` — payment provider adapters (YooKassa)
 - `src/routes/` — API endpoints
 - `src/services/` — business logic
 - `src/middleware/` — auth middleware
 
 ## Key rules
+
 - Amounts always in kopecks (integer). Convert to rubles only at provider API boundary.
 - Never trust webhook body — always re-verify via provider API.
 - Each project (FNS, trainer, etc.) has its own API key in `pay_projects` table.
@@ -178,6 +183,7 @@ git add -A && git commit -m "feat: project scaffolding"
 ## Task 2: Database Migrations
 
 **Files:**
+
 - Create: `supabase/migrations/001_pay_purchases.sql`
 - Create: `supabase/migrations/002_pay_projects.sql`
 - Create: `supabase/migrations/003_pay_webhook_log.sql`
@@ -262,6 +268,7 @@ git add supabase/ && git commit -m "feat: database migrations for purchases, pro
 ## Task 3: Provider Layer (from gims-pay shared/packages/payments)
 
 **Files:**
+
 - Create: `src/providers/types.ts`
 - Create: `src/providers/yookassa.ts`
 - Create: `src/providers/webhook-parser.ts`
@@ -393,14 +400,19 @@ export class YooKassaProvider implements PaymentProvider {
   }
 
   async getPayment(providerPaymentId: string): Promise<Payment> {
-    const res = await this.request<YooKassaPaymentResponse>('GET', `/payments/${providerPaymentId}`);
+    const res = await this.request<YooKassaPaymentResponse>(
+      'GET',
+      `/payments/${providerPaymentId}`,
+    );
     return this.mapPayment(res);
   }
 
   async capturePayment(providerPaymentId: string, amount: Money): Promise<Payment> {
     const body = { amount: { value: kopecksToRubles(amount.amount), currency: amount.currency } };
     const res = await this.request<YooKassaPaymentResponse>(
-      'POST', `/payments/${providerPaymentId}/capture`, body,
+      'POST',
+      `/payments/${providerPaymentId}/capture`,
+      body,
       { 'Idempotence-Key': `capture-${providerPaymentId}` },
     );
     return this.mapPayment(res);
@@ -421,11 +433,18 @@ export class YooKassaProvider implements PaymentProvider {
   }
 
   private async request<T>(
-    method: string, path: string, body?: unknown, extraHeaders?: Record<string, string>,
+    method: string,
+    path: string,
+    body?: unknown,
+    extraHeaders?: Record<string, string>,
   ): Promise<T> {
     const res = await fetch(`${YOOKASSA_API}${path}`, {
       method,
-      headers: { Authorization: this.authHeader, 'Content-Type': 'application/json', ...extraHeaders },
+      headers: {
+        Authorization: this.authHeader,
+        'Content-Type': 'application/json',
+        ...extraHeaders,
+      },
       body: body ? JSON.stringify(body) : undefined,
     });
     if (!res.ok) {
@@ -507,6 +526,7 @@ git add src/providers/ && git commit -m "feat: payment provider layer (YooKassa 
 ## Task 4: Core Infrastructure (config, db, middleware)
 
 **Files:**
+
 - Create: `src/config.ts`, `src/db.ts`, `src/middleware/api-key.ts`, `src/middleware/cron-auth.ts`
 
 - [ ] **Step 1: Create config.ts**
@@ -608,6 +628,7 @@ git add src/config.ts src/db.ts src/middleware/ && git commit -m "feat: config, 
 ## Task 5: Services (purchase, project, webhook-fanout)
 
 **Files:**
+
 - Create: `src/services/purchase-service.ts`, `src/services/project-service.ts`, `src/services/webhook-fanout.ts`
 
 - [ ] **Step 1: Create purchase-service.ts**
@@ -755,10 +776,7 @@ export async function getExpiredPurchases(): Promise<Purchase[]> {
 }
 
 export async function markPurchaseExpired(id: string): Promise<void> {
-  await getSupabase()
-    .from('pay_purchases')
-    .update({ status: 'expired' })
-    .eq('id', id);
+  await getSupabase().from('pay_purchases').update({ status: 'expired' }).eq('id', id);
 }
 ```
 
@@ -790,10 +808,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
 }
 
 export async function getAllActiveProjects(): Promise<Project[]> {
-  const { data } = await getSupabase()
-    .from('pay_projects')
-    .select('*')
-    .eq('active', true);
+  const { data } = await getSupabase().from('pay_projects').select('*').eq('active', true);
   return (data || []) as Project[];
 }
 ```
@@ -884,6 +899,7 @@ git add src/services/ && git commit -m "feat: services (purchase, project, webho
 ## Task 6: Routes (create, webhook, status, health, cron)
 
 **Files:**
+
 - Create: `src/routes/create.ts`, `src/routes/webhook.ts`, `src/routes/status.ts`, `src/routes/health.ts`, `src/routes/cron.ts`
 
 - [ ] **Step 1: Create health.ts**
@@ -913,7 +929,17 @@ create.post('/', async (c) => {
 
   try {
     const body = await c.req.json();
-    const { userId, project, productId, productType, amountKop, durationDays, description, returnUrl, metadata } = body;
+    const {
+      userId,
+      project,
+      productId,
+      productType,
+      amountKop,
+      durationDays,
+      description,
+      returnUrl,
+      metadata,
+    } = body;
 
     if (!userId || !project || !productId || !productType || !description || !returnUrl) {
       return c.json({ error: 'Missing required fields' }, 400);
@@ -945,21 +971,27 @@ create.post('/', async (c) => {
       metadata: { project, productType, productId, userId, ...metadata },
       receipt: {
         customer: { email: customerEmail },
-        items: [{
-          description,
-          amount: { value: rubles, currency: 'RUB' },
-          quantity: 1,
-          vat_code: 1,
-          payment_subject: 'service',
-          payment_mode: 'full_payment',
-        }],
+        items: [
+          {
+            description,
+            amount: { value: rubles, currency: 'RUB' },
+            quantity: 1,
+            vat_code: 1,
+            payment_subject: 'service',
+            payment_mode: 'full_payment',
+          },
+        ],
       },
     });
 
     providerPaymentId = payment.providerPaymentId;
 
     await createPurchaseRecord({
-      userId, project, productId, productType, amountKop,
+      userId,
+      project,
+      productId,
+      productType,
+      amountKop,
       durationDays: durationDays || 0,
       provider: 'yookassa',
       providerPaymentId: payment.providerPaymentId,
@@ -968,7 +1000,10 @@ create.post('/', async (c) => {
 
     return c.json({ confirmationUrl: payment.confirmationUrl });
   } catch (error) {
-    console.error(`Payment create error${providerPaymentId ? ` (orphaned: ${providerPaymentId})` : ''}:`, error);
+    console.error(
+      `Payment create error${providerPaymentId ? ` (orphaned: ${providerPaymentId})` : ''}:`,
+      error,
+    );
     return c.json({ error: 'Payment creation failed' }, 500);
   }
 });
@@ -1005,7 +1040,9 @@ webhook.post('/yookassa', async (c) => {
       });
       const verified = await provider.getPayment(event.payment.providerPaymentId);
       if (verified.status !== 'succeeded') {
-        console.warn(`Webhook: payment ${event.payment.providerPaymentId} status=${verified.status}`);
+        console.warn(
+          `Webhook: payment ${event.payment.providerPaymentId} status=${verified.status}`,
+        );
         return c.json({ ok: true });
       }
 
@@ -1170,6 +1207,7 @@ git add src/routes/ && git commit -m "feat: all routes (create, webhook+fanout, 
 ## Task 7: App Entry Point
 
 **Files:**
+
 - Create: `src/index.ts`
 
 - [ ] **Step 1: Create index.ts**
@@ -1238,6 +1276,7 @@ git add src/index.ts && git commit -m "feat: app entry point with all routes and
 ## Task 8: Dockerfile
 
 **Files:**
+
 - Create: `Dockerfile`
 
 - [ ] **Step 1: Create Dockerfile**
@@ -1298,16 +1337,16 @@ git push origin main
 
 ## Task Summary
 
-| Task | Description | Dependencies |
-|------|-------------|-------------|
-| 1 | Project scaffolding (package.json, tsconfig, etc.) | None |
-| 2 | Database migrations | None |
-| 3 | Provider layer (YooKassa + webhook parser) | 1 |
-| 4 | Core infrastructure (config, db, middleware) | 1 |
-| 5 | Services (purchase, project, webhook-fanout) | 4 |
-| 6 | Routes (create, webhook, status, health, cron) | 3, 4, 5 |
-| 7 | App entry point | 6 |
-| 8 | Dockerfile | 7 |
-| 9 | Full build + push | All |
+| Task | Description                                        | Dependencies |
+| ---- | -------------------------------------------------- | ------------ |
+| 1    | Project scaffolding (package.json, tsconfig, etc.) | None         |
+| 2    | Database migrations                                | None         |
+| 3    | Provider layer (YooKassa + webhook parser)         | 1            |
+| 4    | Core infrastructure (config, db, middleware)       | 1            |
+| 5    | Services (purchase, project, webhook-fanout)       | 4            |
+| 6    | Routes (create, webhook, status, health, cron)     | 3, 4, 5      |
+| 7    | App entry point                                    | 6            |
+| 8    | Dockerfile                                         | 7            |
+| 9    | Full build + push                                  | All          |
 
 **Parallelizable:** Tasks 1+2, Tasks 3+4 (after 1).
