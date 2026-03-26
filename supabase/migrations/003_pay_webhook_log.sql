@@ -11,3 +11,5 @@ CREATE TABLE pay_webhook_log (
 
 CREATE INDEX idx_pay_webhook_log_project
   ON pay_webhook_log(project_slug, created_at);
+
+ALTER TABLE pay_webhook_log ENABLE ROW LEVEL SECURITY;

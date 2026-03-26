@@ -4,8 +4,9 @@ import {
   getExpiringPurchases,
   markPurchaseExpired,
 } from '../services/purchase-service.js';
-import { getProjectBySlug } from '../services/project-service.js';
+import { getAllActiveProjects } from '../services/project-service.js';
 import { fanOutWebhook } from '../services/webhook-fanout.js';
+import { getSupabase } from '../db.js';
 
 const cron = new Hono();
 
@@ -14,9 +15,11 @@ cron.get('/check-expiring', async (c) => {
     let notified = 0;
     let expired = 0;
 
-    const expiring = await getExpiringPurchases(30);
+    const projects = await getAllActiveProjects();
+    const maxDays = Math.max(...projects.map(p => p.notify_before_days), 7);
+    const expiring = await getExpiringPurchases(maxDays);
     for (const purchase of expiring) {
-      const project = await getProjectBySlug(purchase.project);
+      const project = projects.find(p => p.slug === purchase.project);
       if (!project) {
         continue;
       }
@@ -28,6 +31,17 @@ cron.get('/check-expiring', async (c) => {
       if (daysLeft > project.notify_before_days) {
         continue;
       }
+
+      const { data: alreadyNotified } = await getSupabase()
+        .from('pay_webhook_log')
+        .select('id')
+        .eq('project_slug', purchase.project)
+        .eq('event_type', 'subscription.expiring')
+        .filter('payload->userId', 'eq', purchase.user_id)
+        .filter('payload->productId', 'eq', purchase.product_id)
+        .limit(1);
+
+      if (alreadyNotified && alreadyNotified.length > 0) continue;
 
       await fanOutWebhook(purchase.project, {
         event: 'subscription.expiring',

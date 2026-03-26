@@ -49,7 +49,7 @@ create.post('/', async (c) => {
       amount: { amount: amountKop, currency: 'RUB' },
       description,
       returnUrl,
-      metadata: { project, productType, productId, userId, ...metadata },
+      metadata: { ...metadata, project, productType, productId, userId },
       receipt: {
         customer: { email: customerEmail },
         items: [

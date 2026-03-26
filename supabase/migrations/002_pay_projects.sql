@@ -11,3 +11,5 @@ CREATE TABLE pay_projects (
 );
 
 CREATE INDEX idx_pay_projects_api_key ON pay_projects(api_key);
+
+ALTER TABLE pay_projects ENABLE ROW LEVEL SECURITY;

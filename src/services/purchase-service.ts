@@ -155,8 +155,9 @@ export async function getExpiredPurchases(): Promise<Purchase[]> {
 }
 
 export async function markPurchaseExpired(id: string): Promise<void> {
-  await getSupabase()
+  const { error } = await getSupabase()
     .from('pay_purchases')
     .update({ status: 'expired' })
     .eq('id', id);
+  if (error) throw new Error(`Failed to mark expired: ${error.message}`);
 }
