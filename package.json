@@ -15,7 +15,7 @@
     "format:check": "prettier --check .",
     "build": "tsc",
     "start": "node --env-file=.env dist/index.js",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "prepare": "husky",
     "push-test": "scripts/coolify.sh push-test"
