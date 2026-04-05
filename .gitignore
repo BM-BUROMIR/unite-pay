@@ -1,12 +1,39 @@
+# Dependencies
 node_modules/
+
+# Build
 dist/
+*.tsbuildinfo
+
+# Test
+coverage/
+test-results/
+playwright-report/
+
+# Environment
 .env
 .env.*
 !.env.example
-*.log
-.task-runner/
 .coolify.env
+.db.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
 .DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Tools — Claude Code, Superpowers, Task Runner
+.task-runner/
+.superpowers/
+docs/superpowers/
 .claude/settings.local.json
 .mcp.json
-coverage/
+.playwright-mcp/

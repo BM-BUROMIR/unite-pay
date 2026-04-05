@@ -1,28 +1,40 @@
-# unite-pay
+# CLAUDE.md — pay
 
-Universal payment microservice for aipinion projects.
+> Стандарты: [`../CLAUDE.md`](../CLAUDE.md)
 
-## Stack
+## Обзор
 
-Hono 4 + Supabase + TypeScript + YooKassa
+Платёжный микросервис aipinion. ЮKassa, webhooks, fan-out уведомления клиентам.
 
-## Commands
+## Tech Stack
 
-- `npm run dev` — dev server with hot reload
-- `npm run build` — compile TypeScript
-- `npm run lint` — ESLint
-- `npm test` — Vitest
+Hono 4 + TypeScript + Supabase + YooKassa SDK
 
-## Architecture
+## Структура
 
-- `src/providers/` — payment provider adapters (YooKassa)
-- `src/routes/` — API endpoints
-- `src/services/` — business logic
-- `src/middleware/` — auth middleware
+```
+src/
+├── providers/    # Адаптеры (YooKassa)
+├── routes/       # API endpoints
+├── services/     # Бизнес-логика
+├── middleware/    # Auth
+├── config.ts / db.ts / index.ts
+```
 
-## Key rules
+## Команды
 
-- Amounts always in kopecks (integer). Convert to rubles only at provider API boundary.
-- Never trust webhook body — always re-verify via provider API.
-- Each project (FNS, trainer, etc.) has its own API key in `pay_projects` table.
-- Fan-out webhooks to clients after payment processing.
+```bash
+npm run dev / build / lint / test
+```
+
+## Зависимости
+
+- **auth/** — JWT через JWKS
+- **fns/** и клиенты — создают платежи, получают fan-out webhooks
+
+## Правила
+
+1. **Суммы в копейках** (integer). Конвертация — на границе API провайдера
+2. **Не доверять телу webhook** — перепроверять через API ЮKassa
+3. **Per-project API keys** в `pay_projects`
+4. **Fan-out webhooks** — уведомления зарегистрированным клиентам
