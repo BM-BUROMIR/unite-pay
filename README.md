@@ -20,18 +20,18 @@ npm run dev
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Dev server with hot reload (tsx watch) |
-| `npm run build` | Compile TypeScript |
-| `npm run start` | Run compiled server |
-| `npm run lint` | ESLint |
-| `npm run lint:fix` | ESLint with auto-fix |
-| `npm run format` | Prettier format |
-| `npm run format:check` | Prettier check |
-| `npm test` | Run tests (Vitest) |
-| `npm run test:watch` | Tests in watch mode |
-| `npm run push-test` | Deploy via Coolify |
+| Command                | Description                            |
+| ---------------------- | -------------------------------------- |
+| `npm run dev`          | Dev server with hot reload (tsx watch) |
+| `npm run build`        | Compile TypeScript                     |
+| `npm run start`        | Run compiled server                    |
+| `npm run lint`         | ESLint                                 |
+| `npm run lint:fix`     | ESLint with auto-fix                   |
+| `npm run format`       | Prettier format                        |
+| `npm run format:check` | Prettier check                         |
+| `npm test`             | Run tests (Vitest)                     |
+| `npm run test:watch`   | Tests in watch mode                    |
+| `npm run push-test`    | Deploy via Coolify                     |
 
 ## Architecture
 
