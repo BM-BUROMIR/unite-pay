@@ -1,15 +1,18 @@
-FROM node:22-alpine AS builder
+FROM mirror.gcr.io/library/node:22-alpine AS builder
 
 WORKDIR /app
+# RU network: dl-cdn.alpinelinux.org Fastly edge may be blocked, see ~/unite/rules/docker-mirrors.md
+RUN sed -i 's|https\?://dl-cdn.alpinelinux.org|https://mirror.yandex.ru/mirrors|g' /etc/apk/repositories
 COPY package.json package-lock.json* ./
 RUN npm ci
 COPY tsconfig.json ./
 COPY src/ src/
 RUN npm run build
 
-FROM node:22-alpine
+FROM mirror.gcr.io/library/node:22-alpine
 
-RUN apk add --no-cache curl
+RUN sed -i 's|https\?://dl-cdn.alpinelinux.org|https://mirror.yandex.ru/mirrors|g' /etc/apk/repositories && \
+    apk add --no-cache curl
 
 WORKDIR /app
 

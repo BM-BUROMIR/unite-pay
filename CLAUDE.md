@@ -38,3 +38,12 @@ npm run dev / build / lint / test
 2. **Не доверять телу webhook** — перепроверять через API ЮKassa
 3. **Per-project API keys** в `pay_projects`
 4. **Fan-out webhooks** — уведомления зарегистрированным клиентам
+
+## Docker / RU-зеркала
+
+Базовые образы и пакетные менеджеры идут через RU-зеркала (Fastly edge `199.232.174.132` режется провайдером):
+
+- `FROM mirror.gcr.io/library/node:22-alpine`
+- `RUN sed -i 's|https\?://dl-cdn.alpinelinux.org|https://mirror.yandex.ru/mirrors|g' /etc/apk/repositories` перед `apk add`
+
+Полный rule: `~/unite/rules/docker-mirrors.md`. Issue: [`BM-BUROMIR/YaD_Agent#10`](https://github.com/BM-BUROMIR/YaD_Agent/issues/10).
