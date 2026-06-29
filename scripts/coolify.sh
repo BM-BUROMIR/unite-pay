@@ -65,7 +65,7 @@ _api() {
   if [[ -n "${COOLIFY_CURL_INTERFACE:-}" ]]; then
     curl_args+=(--interface "$COOLIFY_CURL_INTERFACE")
   fi
-  curl "${curl_args[@]}" -sS --fail-with-body -X "$method" \
+  curl ${curl_args[@]+"${curl_args[@]}"} -sS --fail-with-body -X "$method" \
     -H "Authorization: Bearer $COOLIFY_TOKEN" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
@@ -144,7 +144,7 @@ cmd_deploy() {
   if [[ -n "${COOLIFY_CURL_INTERFACE:-}" ]]; then
     curl_args+=(--interface "$COOLIFY_CURL_INTERFACE")
   fi
-  response=$(curl "${curl_args[@]}" -sS -X POST \
+  response=$(curl ${curl_args[@]+"${curl_args[@]}"} -sS -X POST \
     -H "Authorization: Bearer $COOLIFY_TOKEN" \
     -H "Content-Type: application/json" \
     -H "Accept: application/json" \
@@ -362,7 +362,7 @@ if items:
   if [[ -n "${COOLIFY_CURL_INTERFACE:-}" ]]; then
     curl_args+=(--interface "$COOLIFY_CURL_INTERFACE")
   fi
-  curl "${curl_args[@]}" -sS -H "Authorization: Bearer $COOLIFY_TOKEN" \
+  curl ${curl_args[@]+"${curl_args[@]}"} -sS -H "Authorization: Bearer $COOLIFY_TOKEN" \
     -H "Accept: application/json" \
     "$COOLIFY_URL/api/v1/deployments/$deploy_uuid" \
     | python3 -c "
