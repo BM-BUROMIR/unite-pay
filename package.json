@@ -3,31 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=22",
-    "npm": ">=10"
-  },
   "scripts": {
     "dev": "tsx watch --env-file=.env src/index.ts",
     "lint": "eslint src/",
     "lint:fix": "eslint --fix src/",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
     "build": "tsc",
     "start": "node --env-file=.env dist/index.js",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "prepare": "husky",
     "push-test": "scripts/coolify.sh push-test"
-  },
-  "lint-staged": {
-    "*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "*.{json,md,css,html}": [
-      "prettier --write"
-    ]
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
@@ -40,10 +27,23 @@
     "eslint": "^10.0.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.1.0",
-    "prettier": "^3.5.3",
+    "oxfmt": "^0.59.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.56.1",
     "vitest": "^4.0.18"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "oxfmt --no-error-on-unmatched-pattern"
+    ],
+    "*.{json,md,css,html}": [
+      "oxfmt --no-error-on-unmatched-pattern"
+    ]
+  },
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10"
   }
 }
